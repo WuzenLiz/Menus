@@ -1,21 +1,83 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import data from "./data";
+import { Transition, Transitioning } from "react-native-reanimated";
+
+const transition = (
+  <Transition.Together>
+    <Transition.In type="fade" durationMs={200} />
+    <Transition.Change />
+    <Transition.Out type="fade" durationMs={200} />
+  </Transition.Together>
+);
 
 export default function App() {
+  const [currentIndex, setCurrentIndex] = React.useState<any | null>(null);
+  const ref = React.useRef();
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Transitioning.View
+      ref={ref}
+      transition={transition}
+      style={styles.container}
+    >
+      <StatusBar hidden />
+      {data.map(({ bg, color, category, subCategories }, index) => {
+        return (
+          <TouchableOpacity
+            key="category"
+            onPress={() => {
+              ref.current.animateNextTransition();
+              setCurrentIndex(index === currentIndex ? null : index);
+            }}
+            style={styles.cardContainer}
+            activeOpacity={0.9}
+          >
+            <View style={[styles.card, { backgroundColor: bg }]}>
+              <Text style={[styles.heading, { color }]}>{category}</Text>
+              {index === currentIndex && (
+                <View style={styles.subCategoriesList}>
+                  {subCategories.map((subCategory, index) => (
+                    <Text key={index} style={[styles.body, { color }]}>
+                      {subCategory}
+                    </Text>
+                  ))}
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </Transitioning.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    justifyContent: "center",
   },
+  cardContainer: {
+    flexGrow: 1,
+  },
+  card: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomColor: "#242424",
+    borderWidth: 0.25,
+  },
+  heading: {
+    fontSize: 30,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: -2,
+  },
+  body: {
+    fontSize: 20,
+    lineHeight: 20 * 1.5,
+    textAlign: "center",
+  },
+  subCategoriesList: {},
 });
